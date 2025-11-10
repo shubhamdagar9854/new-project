@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome Page</title>
+  <link rel="stylesheet" href="/stylesheets/profile.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Welcome, <%= user.username %> 👋</h1>
+
+      <div class="profile-section">
+        <% if (user.dp) { %>
+          <img src="/uploads/<%= user.dp %>" alt="Profile Picture" class="profile-pic">
+          <% } else { %>
+            <div class="no-pic">No profile picture uploaded yet</div>
+            <% } %>
+
+              <form action="/upload" method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="dp" accept="image/*" required />
+                <button type="submit" class="btn">Upload / Change Picture</button>
+              </form>
+      </div>
+
+      <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+  </div>
+</body>
+
+</html>
