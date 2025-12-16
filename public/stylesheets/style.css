@@ -144,3 +144,8 @@ form div.incorrect input {
 #error-message {
     color: #f06272;
 }
+p {
+  display: block;
+  color: #333;  /* Ya koi visible color */
+  margin: 10px 0;
+}

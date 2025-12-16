@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard</title>
+</head>
+
+<body>
+    <h1>Admin Dashboard</h1>
+    <h2>Pending Users:</h2>
+    <ul>
+        <% users.forEach(user => { %>
+            <li>
+                <%= user.username %> - <%= user.email %>
+                <form method="POST" action="/admin/approve/<%= user._id %>" onsubmit="return approveUser(this);">
+                    <button type="submit">Approve</button>
+                </form>
+            </li>
+        <% }) %>
+    </ul>
+
+    <script>
+        async function approveUser(form) {
+            try {
+                const response = await fetch(form.action, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // page reload after approval
+                } else {
+                    alert("Error approving user");
+                }
+            } catch (err) {
+                console.error("Approval error:", err);
+                alert("Something went wrong!");
+            }
+            return false; // prevent default form submit
+        }
+    </script>
+</body>
+
+</html>

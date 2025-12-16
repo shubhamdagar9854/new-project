@@ -15,7 +15,7 @@
 
       <div class="profile-section">
         <% if (user.dp) { %>
-          <img src="/uploads/<%= user.dp %>" alt="Profile Picture" class="profile-pic">
+          <img src="/photo/<%= user.dp %>">
           <% } else { %>
             <div class="no-pic">No profile picture uploaded yet</div>
             <% } %>
@@ -25,6 +25,7 @@
                 <button type="submit" class="btn">Upload / Change Picture</button>
               </form>
       </div>
+
 
       <a href="/logout" class="logout-btn">Logout</a>
     </div>
