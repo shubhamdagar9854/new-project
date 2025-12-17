@@ -21,10 +21,11 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.redirect('/admin/dashboard');
 });
 
-// Admin dashboard (pending users)
+// Admin dashboard (manage users)
 router.get('/dashboard', isAdmin, async (req, res) => {
-  const pendingUsers = await userModel.find({ isApproved: false });
-  res.render('admin-dashboard', { users: pendingUsers });
+  // Fetch all non-admin users
+  const allUsers = await userModel.find({ userType: { $ne: 'admin' } });
+  res.render('admin-dashboard', { users: allUsers });
 });
 
 // Approve user
@@ -32,7 +33,8 @@ router.post('/approve/:userId', isAdmin, async (req, res) => {
   await userModel.findByIdAndUpdate(req.params.userId, {
     isApproved: true,
     approvedBy: req.user._id,
-    approvedAt: new Date()
+    approvedAt: new Date(),
+    showWelcomePage: true
   });
   res.json({ success: true, message: 'User approved' });
 });

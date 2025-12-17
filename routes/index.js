@@ -30,6 +30,17 @@ router.get('/signup', function (req, res) {
 });
 
 // =====================================================
+// WELCOME PAGE ROUTE (after first approval)
+router.get('/welcome', isLoggedIn, async (req, res) => {
+  if (!req.user.showWelcomePage) {
+    return res.redirect('/profile');
+  }
+  // Update flag to not show welcome page again
+  await userModel.findByIdAndUpdate(req.user._id, { showWelcomePage: false });
+  res.render('welcome', { user: req.user });
+});
+
+// =====================================================
 // PROFILE PAGE ROUTE
 router.get('/profile', isLoggedIn, function (req, res, next) {
   res.render('profile', { user: req.user });
@@ -111,6 +122,11 @@ router.post("/login", function(req, res, next) {
 
     req.logIn(freshUser, function(err) {
       if (err) return next(err);
+
+      // 웰컴 페이지 리디렉션 로직
+      if (freshUser.showWelcomePage) {
+        return res.redirect('/welcome');
+      }
       return res.redirect("/profile");
     });
 

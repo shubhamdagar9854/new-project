@@ -5,7 +5,20 @@ const userSchema = new mongoose.Schema({
   username: String,
   email: String,
   fullName: String,
-  userType: String
+  userType: String,
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  approvedAt: Date,
+  showWelcomePage: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // 🔹 Passport plugin
