@@ -32,11 +32,12 @@ router.get('/signup', function (req, res) {
 // =====================================================
 // WELCOME PAGE ROUTE (after first approval)
 router.get('/welcome', isLoggedIn, async (req, res) => {
-  if (!req.user.showWelcomePage) {
-    return res.redirect('/profile');
-  }
+  // Temporarily always show welcome page for testing
+  // if (!req.user.showWelcomePage) {
+  //   return res.redirect('/profile');
+  // }
   // Update flag to not show welcome page again
-  await userModel.findByIdAndUpdate(req.user._id, { showWelcomePage: false });
+  // await userModel.findByIdAndUpdate(req.user._id, { showWelcomePage: false });
   res.render('welcome', { user: req.user });
 });
 
@@ -82,23 +83,22 @@ router.post('/register', async function (req, res, next) {
       username,
       email,
       userType,
-      isApproved: false
+      isApproved: true,
+      showWelcomePage: true
     });
-
-    // First admin auto-create
-    const adminExists = await userModel.exists({ userType: 'admin' });
-    if (!adminExists) {
-      newUser.userType = 'admin';
-      newUser.isApproved = true;
-    }
 
     const registeredUser = await userModel.register(newUser, password);
 
-    if (newUser.userType === 'admin') {
-      res.send("✅ Registration successful! You are the first admin. You can login immediately.");
-    } else {
-      res.send("✅ Registration successful! Your account is pending admin approval.");
-    }
+    // Auto-login after registration
+    req.logIn(registeredUser, function(err) {
+      if (err) {
+        console.error('Auto-login Error:', err);
+        return res.send("✅ Registration successful! Please login manually.");
+      }
+      
+      // Redirect to welcome page immediately
+      return res.redirect('/welcome');
+    });
 
   } catch (err) {
     console.error('Registration Error:', err);
@@ -113,18 +113,14 @@ router.post("/login", function(req, res, next) {
     if (err) return next(err);
     if (!user) return res.send("❌ Invalid username or password");
 
-    // ✅ Fetch latest user to get updated approval status
+    // ✅ Fetch latest user
     const freshUser = await userModel.findById(user._id);
-
-    if (!freshUser.isApproved) {
-      return res.send("⏳ Your account is pending admin approval. Please wait for admin to approve your account.");
-    }
 
     req.logIn(freshUser, function(err) {
       if (err) return next(err);
 
-      // 웰컴 페이지 리디렉션 로직
-      if (freshUser.showWelcomePage) {
+      //- Temporarily always redirect to welcome for testing
+      if (true) { // freshUser.showWelcomePage) {
         return res.redirect('/welcome');
       }
       return res.redirect("/profile");
