@@ -8,25 +8,46 @@ const path = require('path');
 const fs = require('fs');
 
 // =====================================================
+// AUTHENTICATION MIDDLEWARE - PROTECT ALL ROUTES
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+}
+
+// =====================================================
 // PASSPORT CONFIGURATION
 passport.use(new LocalStrategy(userModel.authenticate()));
 
 // =====================================================
-// HOME PAGE ROUTE
+// HOME PAGE ROUTE - REDIRECT TO LOGIN OR WELCOME
 router.get('/', function (req, res, next) {
-  res.redirect('/login');
+  if (req.isAuthenticated()) {
+    res.redirect('/welcome');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // =====================================================
-// LOGIN PAGE ROUTE
+// LOGIN PAGE ROUTE - SKIP IF ALREADY LOGGED IN
 router.get('/login', function (req, res) {
-  res.render('login');
+  if (req.isAuthenticated()) {
+    res.redirect('/welcome');
+  } else {
+    res.render('login');
+  }
 });
 
 // =====================================================
-// SIGNUP PAGE ROUTE
+// SIGNUP PAGE ROUTE - SKIP IF ALREADY LOGGED IN
 router.get('/signup', function (req, res) {
-  res.render('signup');
+  if (req.isAuthenticated()) {
+    res.redirect('/welcome');
+  } else {
+    res.render('signup');
+  }
 });
 
 // =====================================================
@@ -37,13 +58,13 @@ router.get('/welcome', isLoggedIn, async (req, res) => {
   //   return res.redirect('/profile');
   // }
   // Update flag to not show welcome page again
-  // await userModel.findByIdAndUpdate(req.user._id, { showWelcomePage: false });
+  await userModel.findByIdAndUpdate(req.user._id, { showWelcomePage: false });
   res.render('welcome', { user: req.user });
 });
 
 // =====================================================
-// PROFILE PAGE ROUTE
-router.get('/profile', isLoggedIn, function (req, res, next) {
+// PROFILE PAGE ROUTE - PROTECTED
+router.get('/profile', isLoggedIn, function (req, res) {
   res.render('profile', { user: req.user });
 });
 
@@ -160,13 +181,6 @@ router.get("/logout", function (req, res, next) {
     res.redirect("/login");
   });
 });
-
-// =====================================================
-// AUTH MIDDLEWARE
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.redirect("/");
-}
 
 // =====================================================
 // EXPORT ROUTER
